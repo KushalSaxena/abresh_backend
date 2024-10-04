@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema({
   // },
   role: {
     type: String,
-    enum: ['Admin', 'Customer', 'Volunteer'],
+    enum: ['Admin', 'Sponsor', 'Volunteer', 'Participant', 'Visitor', 'Customer'],
     required : true // Only allows Admin and Customer roles
   },
 });
