@@ -6,6 +6,7 @@ const bookStallSchema = new mongoose.Schema({
     phoneNumber : {type : Number, required: true},
     alternateNumber : {type : Number},
     gender : {type : String, required: true},
+    referredBy : {type : String},
     category : {type : String, required: true},
     description : {type : String, required : true},
     link : {type: String, required: true},
