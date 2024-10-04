@@ -135,3 +135,54 @@ exports.deleteVolunteerById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Update specific fields of a volunteer
+exports.updateVolunteer = async (req, res) => {
+  try {
+    // Extract the volunteer ID from the request parameters
+    const volunteerId = req.params.volunteerId;
+
+    // Define the fields allowed for update from the request body
+    const allowedUpdates = {
+      city: req.body.city,
+      mobile: req.body.mobile,
+      instagramHandle: req.body.instagramHandle,
+      profession: req.body.profession,
+      institute: req.body.institute,
+      briefedBy: req.body.briefedBy,
+      bioData: req.body.bioData,
+      stallStatus: req.body.stallStatus
+    };
+
+    // Remove undefined or null fields from the update object
+    Object.keys(allowedUpdates).forEach(key => {
+      if (allowedUpdates[key] === undefined || allowedUpdates[key] === null) {
+        delete allowedUpdates[key];  // Exclude fields that are not changed
+      }
+    });
+
+    // Ensure there is at least one field to update
+    if (Object.keys(allowedUpdates).length === 0) {
+      return res.status(400).json({ message: 'No fields to update' });
+    }
+
+    // Find the volunteer by ID and update only the allowed fields
+    const updatedVolunteer = await Volunteer.findByIdAndUpdate(
+      volunteerId,
+      { $set: allowedUpdates },  // Only update with allowed fields
+      { new: true, runValidators: true }  // Return updated document and validate
+    );
+
+    // If volunteer not found, return an error
+    if (!updatedVolunteer) {
+      return res.status(404).json({ message: 'Volunteer not found' });
+    }
+
+    // Send the updated volunteer as the response
+    res.status(200).json(updatedVolunteer);
+  } catch (error) {
+    // Handle any errors
+    res.status(400).json({ message: error.message });
+  }
+};
+

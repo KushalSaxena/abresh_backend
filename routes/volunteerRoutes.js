@@ -8,6 +8,8 @@ router.get('/volunteers', volunteerController.getAllVolunteers);          // Get
 router.put('/volunteer/:volunteerId/update', volunteerController.updateVolunteerActivity);   // Update Volunteer by ID
 router.delete('/volunteers/:id', volunteerController.deleteVolunteerById);// Delete Volunteer by ID
 router.get('/volunteer/:id/statistics', volunteerController.getVolunteerStatistics);
+router.put('/volunteers/:volunteerId/update', volunteerController.updateVolunteer);
+
 
 
 module.exports = router;
