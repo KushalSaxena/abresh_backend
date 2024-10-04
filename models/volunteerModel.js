@@ -6,13 +6,32 @@ const volunteerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  gender:{
+    type : String,
+    required : true
+  },
+  dob: {
+    type : String,
+    required : true    
+  },
   city: {
     type: String,
     required: true,
   },
+  pincode : {
+    type : String,
+    required : true
+  },
   mobile: {
     type: String,
     required: true,
+  },
+  alternateNumber : {
+    type : String,
+  },
+  bloodGroup : {
+    type : String,
+    require : true,
   },
   email: {
     type: String,
@@ -37,17 +56,16 @@ const volunteerSchema = new mongoose.Schema({
   },
   interviewBy: {
     type: String,
-    required: true,
+    default : 'N/A'
   },
   interviewStatus: {
     type: String,
     enum: ['Not Answered', 'Selected', 'Rejected'],  
-    required: true,
+    default : 'Not Answered'
     // Example statuses
   },
   briefedBy: {
     type: String,
-    required: true,
   },
   bioData: {
     type: String,
@@ -59,8 +77,8 @@ const volunteerSchema = new mongoose.Schema({
   },
   stallStatus: {
     type: String,
-    enum: ['Active', 'Inactive', 'Pending'],  // Example statuses
-    required: true,
+    enum: ['Active', 'Inactive', 'Pending'], 
+    default : 'Pending' // Example statuses
   },
   recruitedVolunteers: {
     type: Number,

@@ -4,6 +4,8 @@ const bookStallSchema = new mongoose.Schema({
     name : {type : String, required : true},
     email : {type : String, required: true},
     phoneNumber : {type : Number, required: true},
+    alternateNumber : {type : Number},
+    gender : {type : String, required: true},
     category : {type : String, required: true},
     description : {type : String, required : true},
     link : {type: String, required: true},

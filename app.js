@@ -10,6 +10,7 @@ const eventRegisterRoutes = require('./routes/eventRegisterRoutes');
 const bookStallRoutes = require('./routes/bookStallRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const volunteerRoutes = require('./routes/volunteerRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
 const cors = require('cors');
 
 
@@ -28,7 +29,8 @@ app.use('/api', eventEntryRoutes);
 app.use('/api', eventRegisterRoutes);
 app.use('/api', bookStallRoutes);
 app.use('/api', volunteerRoutes);  // All volunteer-related routes prefixed with /api
-app.use('/api', taskRoutes);  // All task-related routes prefixed with /api
+app.use('/api', taskRoutes);  
+app.use('/api',announcementRoutes);
 
 
 const PORT = process.env.PORT || 5000;
