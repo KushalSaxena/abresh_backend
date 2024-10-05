@@ -1,5 +1,5 @@
 // controllers/authController.js
-const Auth = require('../models/userModel');
+const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 const bcrypt = require('bcrypt');
@@ -11,13 +11,13 @@ exports.signup = async (req, res) => {
 
   try {
     // Check if the user already exists
-    const existingUser = await Auth.findOne({ email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'Email already exists, please log in' });
     }
 
     // Create a new user
-    const user = await Auth.create({ username ,email, password, role});
+    const user = await User.create({ username ,email, password, role});
 
     // Generate a JWT token for email verification
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
@@ -79,7 +79,7 @@ exports.login = async (req, res) => {
     }
 
     // Find the user by email
-    const user = await Auth.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ error: 'User with this email not found' });
     }
