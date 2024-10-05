@@ -69,7 +69,7 @@ const volunteerSchema = new mongoose.Schema({
   },
   bioData: {
     type: String,
-    required: true,
+    default : 'N/A'
   },
   photo: {
     type: String,  
