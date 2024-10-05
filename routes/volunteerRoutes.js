@@ -9,7 +9,7 @@ router.put('/volunteer/:volunteerId/update', volunteerController.updateVolunteer
 router.delete('/volunteers/:id', volunteerController.deleteVolunteerById);// Delete Volunteer by ID
 router.get('/volunteer/:id/statistics', volunteerController.getVolunteerStatistics);
 router.put('/volunteers/:volunteerId/update', volunteerController.updateVolunteer);
-router.get('/volunteers/:id/details', volunteerController.getVolunteerDetails);
+router.get('/volunteers/:email/details', volunteerController.getVolunteerDetails);
 
 
 
