@@ -43,6 +43,29 @@ exports.getAllVolunteers = async (req, res) => {
   }
 };
 
+// Get specific volunteer details (stall bookings, recruited volunteers, competition participants, and incentive)
+exports.getVolunteerDetails = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the volunteer ID from the request params
+
+    // Find the volunteer by ID and select only the necessary fields
+    const volunteer = await Volunteer.findById(id, 'recruitedVolunteers competitionParticipants stallBookings incentiveEarned completeName email');
+
+    // If volunteer not found, return 404
+    if (!volunteer) {
+      return res.status(404).json({ message: 'Volunteer not found' });
+    }
+
+    // Return the volunteer details
+    res.status(200).json({
+      volunteer
+    });
+  } catch (error) {
+    // Catch and return any errors that occur during fetching
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get volunteer statistics by ID (recruitedVolunteers, competitionParticipants, stallBookings, incentiveEarned)
 exports.getVolunteerStatistics = async (req, res) => {
   try {
@@ -117,7 +140,7 @@ const calculateIncentive = (referredVolunteers, stallBookings, competitionPartic
   }
 
   if (stallBookings > 0) {
-    incentive += stallBookings * 800;
+    incentive += stallBookings * (10/100);
   }
 
   return incentive;
