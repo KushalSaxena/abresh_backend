@@ -14,10 +14,6 @@ const volunteerSchema = new mongoose.Schema({
     type : String,
     required : true    
   },
-  city: {
-    type: String,
-    required: true,
-  },
   pincode : {
     type : String,
     required : true
@@ -29,26 +25,16 @@ const volunteerSchema = new mongoose.Schema({
   alternateNumber : {
     type : String,
   },
-  bloodGroup : {
-    type : String,
-    require : true,
-  },
   email: {
     type: String,
     required: true,
     unique : true,
   },
-  instagramHandle: {
-    type: String,
-    required: true,
-  },
   profession: {
     type: String,
-    required: true,
   },
   institute: {
     type: String,
-    required: true,
   },
   referredBy: {
     type: String,
@@ -56,24 +42,14 @@ const volunteerSchema = new mongoose.Schema({
   },
   interviewBy: {
     type: String,
-    default : 'N/A'
+    enum : ['Backend', 'Arin', 'Rishika'],
+    default : 'Backend'
   },
   interviewStatus: {
     type: String,
     enum: ['Not Answered', 'Selected', 'Rejected'],  
     default : 'Not Answered'
     // Example statuses
-  },
-  briefedBy: {
-    type: String,
-  },
-  bioData: {
-    type: String,
-    default : 'N/A'
-  },
-  photo: {
-    type: String,  
-    required: true,// Store file path or URL
   },
   stallStatus: {
     type: String,
@@ -91,6 +67,10 @@ const volunteerSchema = new mongoose.Schema({
   stallBookings: {
     type: Number,
     default: 0, // Track the number of stalls booked by this volunteer
+  },
+  referredPass:{
+    type : String,
+    default : '0'
   },
   incentiveEarned: {
     type: Number,

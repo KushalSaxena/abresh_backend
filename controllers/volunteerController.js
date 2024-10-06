@@ -167,19 +167,15 @@ exports.updateVolunteer = async (req, res) => {
     // Define the fields allowed for update from the request body
     const allowedUpdates = {
       dob : req.body.dob,
-      city: req.body.city,
       pincode : req.body.pincode,
       mobile: req.body.mobile,
-      photo : req.body.photo,
-      instagramHandle: req.body.instagramHandle,
       profession: req.body.profession,
       institute: req.body.institute,
-      briefedBy: req.body.briefedBy,
       referredBy : req.body.referredBy,
-      bioData: req.body.bioData,
       interviewBy : req.body.interviewBy,
       interviewStatus : req.body.interviewStatus,
-      stallStatus: req.body.stallStatus
+      stallStatus: req.body.stallStatus,
+      referredPass : req.body.referredPass
     };
 
     // Remove undefined or null fields from the update object

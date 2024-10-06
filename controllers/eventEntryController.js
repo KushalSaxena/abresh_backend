@@ -4,10 +4,10 @@ require('dotenv').config();  // Load environment variables
 
 // POST route to submit the event entry form
 exports.eventEntry = async (req, res) => {
-  const { name, email, phone, passCount,transactionNumber,  eventId, location, isDisclaimerChecked } = req.body;
+  const { name, email, phone, referredBy, passCount,transactionNumber,  eventId, location, isDisclaimerChecked } = req.body;
 
   // Validate the required fields
-  if (!name || !email || !phone || !transactionNumber || !passCount || !eventId || !location || !isDisclaimerChecked) {
+  if (!name || !phone || !transactionNumber || !passCount || !eventId || !location || !isDisclaimerChecked) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
@@ -17,6 +17,7 @@ exports.eventEntry = async (req, res) => {
       name,
       email,
       phone,
+      referredBy,
       passCount,
       transactionNumber,
       eventId,
