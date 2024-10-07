@@ -166,9 +166,13 @@ exports.updateVolunteer = async (req, res) => {
 
     // Define the fields allowed for update from the request body
     const allowedUpdates = {
+      completeName : req.body.completeName,
+      email : req.body.email,
+      gender : req.body.gender,
       dob : req.body.dob,
       pincode : req.body.pincode,
       mobile: req.body.mobile,
+      alternateNumber : req.body.alternateNumber,
       profession: req.body.profession,
       institute: req.body.institute,
       referredBy : req.body.referredBy,

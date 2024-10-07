@@ -4,7 +4,7 @@ require('dotenv').config();  // Load environment variables
 const sendEmail = async (fromEmail, smtpUser, smtpPass, to, subject, text) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: 'email-smtp.eu-north-1.amazonaws.com',
+      host: 'email-smtp.ap-south-1.amazonaws.com',
       port: 587,
       secure: false,
       auth: {

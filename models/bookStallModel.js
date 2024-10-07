@@ -9,7 +9,7 @@ const bookStallSchema = new mongoose.Schema({
     referredBy : {type : String},
     category : {type : String, required: true},
     description : {type : String, required : true},
-    link : {type: String, required: true},
+    link : {type: String},
     specialRequest : {type : String},
     boothSize : {type : String, required: true},
     transactionNumber : {type : String, required : true},
