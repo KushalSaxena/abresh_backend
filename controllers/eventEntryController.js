@@ -32,7 +32,7 @@ exports.eventEntry = async (req, res) => {
       process.env.EMAIL_USER,                           // SMTP username for this sender
       process.env.EMAIL_PASS,                           // SMTP password for this sender
       email,                                            // Receiver email
-      'You are In! Entry Pass Confirmation for ABR ArtScape 2024',  // Subject
+      'You are In! Entry Pass Confirmation for ABR ArtScape',  // Subject
       `Dear ${name},\n\nWoohoo! 🎉 Your entry pass to ABR ArtScape in Hisar, Haryana, has been confirmed! 🙌 Our team will now verify your payment and details within the next 4 business hours. Once completed, your entry pass will be on its way to your inbox!\n\nGet ready to dive into an incredible celebration of art, music, food, and culture on November 9th & 10th, 2024! 🌟 This will be a festival to remember, and we’re thrilled to have you join us.\n\nThank you for being part of the ABR ArtScape experience. We can’t wait to welcome you to the event! Tell your friends—it’s going to be a creative explosion like no other! 🎨🎶\n\nBest,\nTeam ABResh Events`
   );
   

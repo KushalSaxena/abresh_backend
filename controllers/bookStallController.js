@@ -53,7 +53,7 @@ exports.createBookStall = async (req, res) => {
             process.env.EMAIL_USER,                           // SMTP username for this sender
             process.env.EMAIL_PASS,                           // SMTP password for this sender
             email,                                            // Receiver email
-            'Congratulations! Your Stall Booking Application Received at ABR ArtScape 2024!',  // Subject
+            'Congratulations! Your Stall Booking Application Received at ABR ArtScape!',  // Subject
             `Dear ${name},\n\nWe’re beyond excited to let you know that your stall booking application for ABR ArtScape in Hisar, Haryana, has been successfully received! 🎉 Our team will review and verify your details and payment within the next 4 business hours. Once everything is set, you’ll receive a final confirmation along with all the essential guidelines to make your booth shine! ✨\n\nGet ready to showcase your creativity, connect with thousands of art lovers, and make your mark at one of the biggest art festivals in the region! 🎨\n\nThank you for choosing ABR ArtScape! We can’t wait to see your work in action! Don’t forget to spread the word and invite others to join this creative celebration!\n\nBest,\nTeam ABResh Events`
         );        
         res.status(201).json(newBookStall);
