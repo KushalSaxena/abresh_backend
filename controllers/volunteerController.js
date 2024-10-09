@@ -4,8 +4,11 @@ const mongoose = require('mongoose');
 
 // Helper function to generate a color based on the volunteer's name
 function generateColorFromName(name) {
-  // Create a hash from the name using SHA-256 (or another algorithm)
-  const hash = crypto.createHash('md5').update(name).digest('hex');
+  // Normalize the name: convert to lowercase and remove spaces
+  const normalizedName = name.toLowerCase().replace(/\s+/g, '');
+
+  // Create a hash from the normalized name using MD5
+  const hash = crypto.createHash('md5').update(normalizedName).digest('hex');
 
   // Use the first 6 characters of the hash to create a valid hex color
   return `#${hash.substring(0, 6)}`;
@@ -24,7 +27,15 @@ exports.createVolunteer = async (req, res) => {
     });
 
     const savedVolunteer = await newVolunteer.save();
-
+    await sendEmail(
+      'artscape@abresh.com',                            // Sender email
+      process.env.EMAIL_USER,                           // SMTP username for this sender
+      process.env.EMAIL_PASS,                           // SMTP password for this sender
+      email,                                            // Receiver email
+      'Welcome to the Team! Your Volunteer Role at ABR ArtScape is Confirmed! 🙌',  // Subject
+      `Dear ${completeName},\n\nCongratulations! 🎉 Your application to join us as a volunteer for ABR ArtScape in Hisar, Haryana, has been confirmed! Our team will now verify your details within the next 4 business hours, and once everything is set, you’ll receive a confirmation email to finalize your role. 🙌\n\nGet ready to immerse yourself in a world of art, creativity, and unforgettable memories! This is your chance to be part of something truly special—meeting new people, experiencing incredible art, and contributing to the success of one of the biggest festivals of the year! 🎨✨\n\nThank you so much for stepping up to be a part of the ABR ArtScape family. We can’t wait to welcome you to the festival on November 9th & 10th, 2024! Stay tuned for more details, and let’s make this event one to remember!\n\nBest,\nTeam ABResh Events`
+    );
+      
     // Step 8: Send success response to client
     res.status(201).json(savedVolunteer);
   } catch (error) {

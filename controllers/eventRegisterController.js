@@ -45,14 +45,26 @@ exports.eventRegister = async (req, res) => {
         });
 
         const saveEventRegister = await newEventRegister.save();
-        // await sendEmail(
-        //     'registration@abresh.com',              // Sender email
-        //     process.env.EMAIL_USER,     // SMTP username for this sender
-        //     process.env.EMAIL_PASS,     // SMTP password for this sender
-        //     email,                            // Receiver email
-        //     'Confirmation: Event Participation Registration', // Subject
-        //     `Hello ${name},\n\nYour event participation registration has been successfully submitted for ${location.city} on ${location.date}. \nTransaction Number: ${transactionNumber}\n\nThank you!`
-        //   );
+        await sendEmail(
+            'registration@abresh.com',              // Sender email
+            process.env.EMAIL_USER,                 // SMTP username for this sender
+            process.env.EMAIL_PASS,                 // SMTP password for this sender
+            email,                                  // Receiver email
+            'Your Participation at ABR ArtScape is Almost Set—Get Ready to Shine! 🌟', // Subject
+            `Dear ${name},
+          
+          We are thrilled to announce that your participation application for ABR ArtScape in Hisar, Haryana, has been successfully received! 🎉 Our team will now review your details and payment within the next 4 business hours. Once everything is confirmed, you’ll receive a final confirmation and all the important guidelines to help you prepare for the event within another 4 business hours!
+          
+          In the meantime, why not share some of your creative work with us? Whether it’s designs, video clips, or anything that showcases your artistic flair, we’d love to see it and keep it for our records! 🎨📸
+          
+          This is your time to shine—so use this time to practice, perfect your skills, and get ready to make a lasting impact on stage. 🚀 This could be the opportunity that opens doors to endless possibilities, and we can’t wait to see you bring your A-game!
+          
+          Thanks for being a part of ABR ArtScape, and stay tuned for your final confirmation. The spotlight is waiting for you!
+          
+          Best,
+          Team ABResh Events`
+          );
+          
         res.status(200).json(saveEventRegister);
     }
     catch (err) {

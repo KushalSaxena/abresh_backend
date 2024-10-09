@@ -11,6 +11,7 @@ const bookStallRoutes = require('./routes/bookStallRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const volunteerRoutes = require('./routes/volunteerRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
+const emailRoute = require('./utils/emailRoute');
 const cors = require('cors');
 
 
@@ -31,6 +32,8 @@ app.use('/api', bookStallRoutes);
 app.use('/api', volunteerRoutes);  // All volunteer-related routes prefixed with /api
 app.use('/api', taskRoutes);  
 app.use('/api',announcementRoutes);
+app.use('/api', emailRoute);  // Register the email route under /api path
+
 
 
 const PORT = process.env.PORT || 5000;

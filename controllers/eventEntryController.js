@@ -28,7 +28,7 @@ exports.eventEntry = async (req, res) => {
     const saveEntry = await newEntry.save();
 
     await sendEmail(
-      'artscape@abresh.com',                            // Sender email
+      'ticket@abresh.com',                            // Sender email
       process.env.EMAIL_USER,                           // SMTP username for this sender
       process.env.EMAIL_PASS,                           // SMTP password for this sender
       email,                                            // Receiver email
