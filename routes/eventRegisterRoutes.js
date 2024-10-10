@@ -10,4 +10,7 @@ router.get('/event/register', eventRegisterController.getAllEventRegistrations);
 
 // Delete an event registration by ID
 router.delete('/event/register/:id', eventRegisterController.deleteEventRegistration);
+
+router.put('/event-register/update/:id', eventRegisterController.updateEventRegister);
+
 module.exports = router;

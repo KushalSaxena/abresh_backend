@@ -87,3 +87,56 @@ exports.deleteBookStall = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+exports.updateBookStall = async (req, res) => {
+    try {
+        const {
+            name,
+            email,
+            phoneNumber,
+            referredBy,
+            category,
+            description,
+            link,
+            specialRequest,
+            boothSize,
+            transactionNumber,
+            staffAttending,
+        } = req.body;
+
+        const { stallId } = req.params; // Extract stallId from req.params
+
+        // Check if the stallId is provided
+        if (!stallId) {
+            return res.status(400).json({ error: "Stall ID is required." });
+        }
+
+        // Find the existing BookStall entry by ID
+        const existingStall = await BookStall.findById(stallId);
+
+        if (!existingStall) {
+            return res.status(404).json({ error: "Stall not found." });
+        }
+
+        // Update the fields with the new data
+        existingStall.name = name || existingStall.name;
+        existingStall.email = email || existingStall.email;
+        existingStall.phoneNumber = phoneNumber || existingStall.phoneNumber;
+        existingStall.referredBy = referredBy || existingStall.referredBy;
+        existingStall.category = category || existingStall.category;
+        existingStall.description = description || existingStall.description;
+        existingStall.link = link || existingStall.link;
+        existingStall.specialRequest = specialRequest || existingStall.specialRequest;
+        existingStall.boothSize = boothSize || existingStall.boothSize;
+        existingStall.transactionNumber = transactionNumber || existingStall.transactionNumber;
+        existingStall.staffAttending = staffAttending || existingStall.staffAttending;
+
+        // Save the updated BookStall document
+        await existingStall.save();        
+
+        // Return the updated stall data
+        res.status(200).json(existingStall);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};

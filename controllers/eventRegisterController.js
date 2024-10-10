@@ -101,3 +101,53 @@ exports.deleteEventRegistration = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+exports.updateEventRegister = async (req, res) => {
+    try {
+        const { id } = req.params;  // Get the id from request params
+
+        // Get all fields from the request body
+        const {
+            eventCategory,
+            name,
+            dateOfBirth,
+            email,
+            phoneNumber,
+            mailingAddress,
+            theme,
+            description,
+            specialRequest,
+            transactionNumber,
+        } = req.body;
+
+        // Find the registration by id and update it with the new details
+        const updatedEventRegister = await EventRegister.findByIdAndUpdate(
+            id,  // The id of the event registration to be updated
+            {
+                eventCategory,
+                name,
+                dateOfBirth,
+                email,
+                phoneNumber,
+                mailingAddress,
+                theme,
+                description,
+                specialRequest,
+                transactionNumber,
+            },
+            { new: true }  // Return the updated document
+        );
+
+        // If event registration is not found, send an error
+        if (!updatedEventRegister) {
+            return res.status(404).json({ error: "Event registration not found" });
+        }        
+
+        // Send the updated event registration details in the response
+        res.status(200).json(updatedEventRegister);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+};

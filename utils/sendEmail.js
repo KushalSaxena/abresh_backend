@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();  // Load environment variables
 
-const sendEmail = async (fromEmail, smtpUser, smtpPass, to, subject, text) => {
+const sendEmail = async (fromEmail, smtpUser, smtpPass, to, subject, text, attachments = []) => {
   try {
     const transporter = nodemailer.createTransport({
       host: 'email-smtp.ap-south-1.amazonaws.com',
@@ -17,7 +17,9 @@ const sendEmail = async (fromEmail, smtpUser, smtpPass, to, subject, text) => {
       from: fromEmail,  // Sender email address
       to,               // Receiver email address
       subject,          // Email subject
-      text,             // Email body
+      text,   
+      attachments       // Attachments (optional)
+      // Email body
     });
 
     console.log('Email sent successfully');

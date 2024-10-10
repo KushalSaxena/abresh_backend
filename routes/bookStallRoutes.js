@@ -11,4 +11,6 @@ router.get('/bookStalls', bookStallController.getBookStalls);
 // DELETE route to remove a specific book stall by ID
 router.delete('/bookStall/:id', bookStallController.deleteBookStall);
 
+router.put('/bookstall/update/:stallId', bookStallController.updateBookStall);
+
 module.exports = router;

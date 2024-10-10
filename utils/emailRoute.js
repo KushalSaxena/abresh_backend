@@ -1,7 +1,42 @@
 const express = require('express');
-const sendEmail = require('./sendEmail');  // Import your email sending function
+const sendEmail = require('./sendEmail');
+const multer = require('multer');
+const path = require('path');  // Import your email sending function
 const router = express.Router();
 
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, 'uploads/');  // Directory where files will be stored
+        },
+        filename: (req, file, cb) => {
+            cb(null, `${Date.now()}-${file.originalname}`);  // File name format with timestamp
+        },
+    }),
+    fileFilter: (req, file, cb) => {
+        // Allowed MIME types
+        const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png', 'application/octet-stream'];
+
+        // Check MIME type
+        if (allowedMimeTypes.includes(file.mimetype)) {
+            // Validate based on extension when the MIME type is `application/octet-stream`
+            const ext = path.extname(file.originalname).toLowerCase();
+            const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '/octet-stream'];
+
+            // Allow file if extension matches the allowed list
+            if (allowedExtensions.includes(ext)) {
+                cb(null, true);
+            } else {
+                cb(new Error('Only PDF and JPG/PNG files are allowed'), false);
+            }
+        } else {
+            cb(new Error('Only PDF and JPG/PNG files are allowed'), false);
+        }
+    },
+    limits: {
+        fileSize: 5 * 1024 * 1024  // Optional file size limit (5MB in this case)
+    }
+});
 // POST route to send an email
 router.post('/send-email-bookstall', async (req, res) => {
     const { name, email } = req.body;
@@ -17,7 +52,7 @@ router.post('/send-email-bookstall', async (req, res) => {
             process.env.EMAIL_PASS,                 // SMTP password from .env file
             email,                                  // Receiver email address
             '🎉 Congratulations! Your Stall is Booked for ABR ArtScape! 🎨🎶',
-            emailText // Email subject emailText                               // Email body content
+            emailText,// Email subject emailText                             
         );
 
         // Send a success response
@@ -28,8 +63,9 @@ router.post('/send-email-bookstall', async (req, res) => {
     }
 });
 
-router.post('/send-email-entry', async (req, res) => {
+router.post('/send-email-entry', upload.single('attachment'), async (req, res) => {
     const { name, email } = req.body;
+    const attachment = req.file; // Get the uploaded file from multer
 
     try {
         // Create the email body content
@@ -42,7 +78,12 @@ router.post('/send-email-entry', async (req, res) => {
             process.env.EMAIL_PASS,                 // SMTP password from .env file
             email,                                  // Receiver email address
             '🎟 You’re In! Your Entry Pass for ABR ArtScape is Confirmed! 🎉',
-            emailText // Email subject emailText                               // Email body content
+            emailText,
+            attachment ? [{                     // Attachments array (if present)
+                filename: attachment.originalname,
+                path: attachment.path,
+                contentType: attachment.mimetype,
+            }] : []   // Email subject emailText                               // Email body content
         );
 
         // Send a success response
@@ -108,7 +149,7 @@ router.post('/send-email-incorrect-info', async (req, res) => {
 
     try {
         // Create the email body content for incorrect information notification
-        const emailText = `Dear ${name},\n\nUnfortunately, it seems that certain details were not accurate or incomplete. We kindly request that you review your submission and provide the correct details as soon as possible.\n\n Should you require any assistance, do not hesitate to reach out us at support@abresh.com.\n\nBest regards,\nTeam ABResh Events`;
+        const emailText = `Dear ${name},\n\nUnfortunately, it seems that certain details were not accurate or incomplete. We kindly request that you review your submission and provide the correct details as soon as possible.\n\nShould you require any assistance, do not hesitate to reach out us at support@abresh.com.\n\nBest regards,\nTeam ABResh Events`;
 
         // Call the sendEmail function to send the email
         await sendEmail(
