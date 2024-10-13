@@ -2,12 +2,13 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
+const generateFcmToken = require('../utils/generateFcmToken');
 const bcrypt = require('bcrypt');
 
 // Signup and email verification
 // Signup and email verification
 exports.signup = async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, role, fcmToken } = req.body;
 
   try {
     // Check if the user already exists
@@ -15,9 +16,10 @@ exports.signup = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ error: 'Email already exists, please log in' });
     }
+    const tokenToSave = fcmToken || generateFcmToken();
 
     // Create a new user
-    const user = await User.create({ username ,email, password, role});
+    const user = await User.create({ username ,email, password, role, fcmToken: tokenToSave});
 
     // Generate a JWT token for email verification
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
@@ -35,7 +37,8 @@ exports.signup = async (req, res) => {
     // );
 
     // Respond with success
-    res.status(201).json({ message: 'Signup successful', token , role: user.role, id: user._id});
+    res.status(201).json({ message: 'Signup successful', token , role: user.role, id: user._id, fcmToken: user.fcmToken,
+    });
 
   } catch (error) {
     // Log the exact error
@@ -70,7 +73,7 @@ exports.signup = async (req, res) => {
 // };
 
 exports.login = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, fcmToken } = req.body;
 
   try {
     // Check if both email and username are provided
@@ -88,7 +91,6 @@ exports.login = async (req, res) => {
     if (user.username !== username) {
       return res.status(400).json({ error: 'Username does not match with the provided email' });
     }
-
     // Check if the email is verified
     // if (!user.isVerified) {
     //   return res.status(400).json({ error: 'Please verify your email first' });
@@ -99,14 +101,16 @@ exports.login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
-
+    const tokenToSave = fcmToken || generateFcmToken();
+    user.fcmToken = tokenToSave;
+    await user.save();
     // Generate JWT token
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '1d',
     });
 
     // Respond with success message and token
-    res.status(200).json({ message: 'Login successful', token, role: user.role, username : user.username, email : user.email, id: user._id });
+    res.status(200).json({ message: 'Login successful', token, role: user.role, username : user.username, email : user.email, id: user._id , fcmToken: user.fcmToken});
 
   } catch (error) {
     // Log detailed error and respond with 500 status
