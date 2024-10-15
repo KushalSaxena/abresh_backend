@@ -1,6 +1,7 @@
 const EventRegister = require('../models/eventRegistrationModel');
 const sendEmail = require('../utils/sendEmail');
-
+const admin = require('../config/firebase'); // Firebase Admin SDK setup
+const User = require('../models/userModel');
 
 exports.eventRegister = async (req, res) => {
     try {
@@ -64,7 +65,37 @@ exports.eventRegister = async (req, res) => {
           Best,
           Team ABResh Events`
           );
-          
+         
+          const abr = await User.find({ role: 'Admin' });
+
+          // Extract FCM tokens from volunteers
+          const tokens = abr.map(v => v.fcmToken).filter(Boolean);
+      
+          if (tokens.length) {
+            const message = {
+              notification: {
+                title: 'Event Participation!',
+                body: `${name} has participated in the event`,
+              },
+              tokens, // List of FCM tokens
+            };
+      
+            console.log('Prepared FCM message:', message);
+      
+            // Send the notification to multiple devices
+            const response = await admin.messaging().sendEachForMulticast(message);
+            console.log('Notification send response:', response);
+      
+            // Log detailed errors for failed tokens
+            response.responses.forEach((resp, idx) => {
+              if (!resp.success) {
+                console.error(`Failed to send to token: ${tokens[idx]}`, resp.error);
+              }
+            });
+      
+          } else {
+            console.log('No valid FCM tokens found.');
+          }  
         res.status(200).json(saveEventRegister);
     }
     catch (err) {

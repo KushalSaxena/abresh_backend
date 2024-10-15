@@ -26,15 +26,21 @@ exports.signup = async (req, res) => {
       expiresIn: '1h',
     });
 
-    // Verification URL
-    // const verificationUrl = `http://192.168.1.10:5000/api/auth/verify-email?token=${token}`;
+    const verificationUrl = `http://52.66.252.88:5000/api/auth/verify-email?token=${token}`;
 
-    // // Send email verification
-    // await sendEmail(
-    //   user.email,
-    //   'Email Verification',
-    //   `Please verify your email by clicking on the following link: ${verificationUrl}`
-    // );
+    // Email content
+    const subject = 'Email Verification';
+    const text = `Hi ${username},\n\nPlease verify your email by clicking on the following link: ${verificationUrl}\n\nThanks,\nABResh Events`;
+
+    // Send verification email
+    await sendEmail(
+      'artscape@abresh.com',              // Sender email (you can change this to your desired sender email)
+      process.env.EMAIL_USER,               // SMTP user from environment variables
+      process.env.EMAIL_PASS,               // SMTP password from environment variables
+      email,                               // Receiver's email (user's email)
+      subject,                             // Email subject
+      text                                 // Email body
+    );
 
     // Respond with success
     res.status(201).json({ message: 'Signup successful', token , role: user.role, id: user._id, fcmToken: user.fcmToken,
@@ -52,25 +58,36 @@ exports.signup = async (req, res) => {
 
 
 // // Verify Email
-// exports.verifyEmail = async (req, res) => {
-//   const { token } = req.query;
+exports.verifyEmail = async (req, res) => {
+  const token = req.query.token;
 
-//   try {
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     const user = await User.findById(decoded.id);
+  try {
+    // Verify the JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-//     if (!user) {
-//       return res.status(400).json({ error: 'Invalid token or user not found' });
-//     }
+    // Find the user by the ID in the decoded token
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid token or user does not exist' });
+    }
 
-//     user.isVerified = true;
-//     await user.save();
+    // Check if the user's email is already verified
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'Email is already verified' });
+    }
 
-//     res.status(200).json({ message: 'Email verified successfully' });
-//   } catch (error) {
-//     res.status(400).json({ error: 'Invalid or expired token' });
-//   }
-// };
+    // Update the user's email verification status
+    user.isVerified = true;
+    await user.save();
+
+    // Respond with success
+    res.status(200).json({ message: 'Email verification successful. You can now log in.' });
+
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(400).json({ error: 'Email verification failed' });
+  }
+};
 
 exports.login = async (req, res) => {
   const { username, email, password, fcmToken } = req.body;
@@ -92,9 +109,9 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Username does not match with the provided email' });
     }
     // Check if the email is verified
-    // if (!user.isVerified) {
-    //   return res.status(400).json({ error: 'Please verify your email first' });
-    // }
+    if (!user.isVerified) {
+      return res.status(400).json({ error: 'Please verify your email first' });
+    }
 
     // Compare the password
     const isPasswordCorrect = await bcrypt.compare(password, user.password);

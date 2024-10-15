@@ -1,6 +1,9 @@
 const Volunteer = require('../models/volunteerModel');
 const crypto = require('crypto');  // To generate hash for color
 const mongoose = require('mongoose');
+const sendEmail = require('../utils/sendEmail');
+const admin = require('../config/firebase'); // Firebase Admin SDK setup
+const User = require('../models/userModel');
 
 // Helper function to generate a color based on the volunteer's name
 function generateColorFromName(name) {
@@ -26,16 +29,47 @@ exports.createVolunteer = async (req, res) => {
       assignedColor: volunteerColor,  // Add color to the volunteer's data
     });
 
-    const savedVolunteer = await newVolunteer.save();
     await sendEmail(
       'artscape@abresh.com',                            // Sender email
       process.env.EMAIL_USER,                           // SMTP username for this sender
       process.env.EMAIL_PASS,                           // SMTP password for this sender
-      email,                                            // Receiver email
+      newVolunteer.email,                                            // Receiver email
       'Welcome to the Team! Your Volunteer Role at ABR ArtScape is Confirmed! 🙌',  // Subject
-      `Dear ${completeName},\n\nCongratulations! 🎉 Your application to join us as a volunteer for ABR ArtScape in Hisar, Haryana, has been confirmed! Our team will now verify your details within the next 4 business hours, and once everything is set, you’ll receive a confirmation email to finalize your role. 🙌\n\nGet ready to immerse yourself in a world of art, creativity, and unforgettable memories! This is your chance to be part of something truly special—meeting new people, experiencing incredible art, and contributing to the success of one of the biggest festivals of the year! 🎨✨\n\nThank you so much for stepping up to be a part of the ABR ArtScape family. We can’t wait to welcome you to the festival on November 9th & 10th, 2024! Stay tuned for more details, and let’s make this event one to remember!\n\nBest,\nTeam ABResh Events`
+      `Dear ${newVolunteer.completeName},\n\nCongratulations! 🎉 Your application to join us as a volunteer for ABR ArtScape in Hisar, Haryana, has been confirmed! Our team will now verify your details within the next 4 business hours, and once everything is set, you’ll receive a confirmation email to finalize your role. 🙌\n\nGet ready to immerse yourself in a world of art, creativity, and unforgettable memories! This is your chance to be part of something truly special—meeting new people, experiencing incredible art, and contributing to the success of one of the biggest festivals of the year! 🎨✨\n\nThank you so much for stepping up to be a part of the ABR ArtScape family. We can’t wait to welcome you to the festival on November 9th & 10th, 2024! Stay tuned for more details, and let’s make this event one to remember!\n\nBest,\nTeam ABResh Events`
     );
-      
+    const savedVolunteer = await newVolunteer.save();
+
+    
+    const abr = await User.find({ role: 'Admin' });
+
+    // Extract FCM tokens from volunteers
+    const tokens = abr.map(v => v.fcmToken).filter(Boolean);
+
+    if (tokens.length) {
+      const message = {
+        notification: {
+          title: 'New Volunteer Registration!',
+          body: `${newVolunteer.completeName} has done registration`,
+        },
+        tokens, // List of FCM tokens
+      };
+
+      console.log('Prepared FCM message:', message);
+
+      // Send the notification to multiple devices
+      const response = await admin.messaging().sendEachForMulticast(message);
+      console.log('Notification send response:', response);
+
+      // Log detailed errors for failed tokens
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          console.error(`Failed to send to token: ${tokens[idx]}`, resp.error);
+        }
+      });
+
+    } else {
+      console.log('No valid FCM tokens found.');
+    }
     // Step 8: Send success response to client
     res.status(201).json(savedVolunteer);
   } catch (error) {

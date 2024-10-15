@@ -25,6 +25,10 @@ const UserSchema = new mongoose.Schema({
     enum: ['Admin', 'Supervisor', 'User', 'Volunteer'],
     required : true // Only allows Admin and Customer roles
   },
+  isVerified : {
+    type : Boolean,
+    default : false
+  },
   fcmToken: {
     type: String, // Store the FCM token
     default: '',

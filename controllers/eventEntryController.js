@@ -1,5 +1,7 @@
 const EventEntry = require('../models/eventEntryModel');
 const sendEmail = require('../utils/sendEmail');
+const admin = require('../config/firebase'); // Firebase Admin SDK setup
+const User = require('../models/userModel');
 require('dotenv').config();  // Load environment variables
 
 // POST route to submit the event entry form
@@ -36,7 +38,36 @@ exports.eventEntry = async (req, res) => {
       `Dear ${name},\n\nWoohoo! 🎉 Your entry pass to ABR ArtScape in Hisar, Haryana, has been confirmed! 🙌 Our team will now verify your payment and details within the next 4 business hours. Once completed, your entry pass will be on its way to your inbox!\n\nGet ready to dive into an incredible celebration of art, music, food, and culture on November 9th & 10th, 2024! 🌟 This will be a festival to remember, and we’re thrilled to have you join us.\n\nThank you for being part of the ABR ArtScape experience. We can’t wait to welcome you to the event! Tell your friends—it’s going to be a creative explosion like no other! 🎨🎶\n\nBest,\nTeam ABResh Events`
     );
 
+    const abr = await User.find({ role: 'Admin' });
 
+    // Extract FCM tokens from volunteers
+    const tokens = abr.map(v => v.fcmToken).filter(Boolean);
+
+    if (tokens.length) {
+      const message = {
+        notification: {
+          title: 'Event passes booking!',
+          body: `${name} has booked a pass`,
+        },
+        tokens, // List of FCM tokens
+      };
+
+      console.log('Prepared FCM message:', message);
+
+      // Send the notification to multiple devices
+      const response = await admin.messaging().sendEachForMulticast(message);
+      console.log('Notification send response:', response);
+
+      // Log detailed errors for failed tokens
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          console.error(`Failed to send to token: ${tokens[idx]}`, resp.error);
+        }
+      });
+
+    } else {
+      console.log('No valid FCM tokens found.');
+    }
     res.status(200).json({ saveEntry });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

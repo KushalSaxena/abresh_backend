@@ -1,6 +1,7 @@
 const BookStall = require('../models/bookStallModel');
 const sendEmail = require('../utils/sendEmail');
-
+const admin = require('../config/firebase'); // Firebase Admin SDK setup
+const User = require('../models/userModel');
 
 // POST: Create a new book stall entry
 exports.createBookStall = async (req, res) => {
@@ -55,7 +56,38 @@ exports.createBookStall = async (req, res) => {
             email,                                            // Receiver email
             'Congratulations! Your Stall Booking Application Received at ABR ArtScape!',  // Subject
             `Dear ${name},\n\nWe’re beyond excited to let you know that your stall booking application for ABR ArtScape in Hisar, Haryana, has been successfully received! 🎉 Our team will review and verify your details and payment within the next 4 business hours. Once everything is set, you’ll receive a final confirmation along with all the essential guidelines to make your booth shine! ✨\n\nGet ready to showcase your creativity, connect with thousands of art lovers, and make your mark at one of the biggest art festivals in the region! 🎨\n\nThank you for choosing ABR ArtScape! We can’t wait to see your work in action! Don’t forget to spread the word and invite others to join this creative celebration!\n\nBest,\nTeam ABResh Events`
-        );        
+        );      
+        
+    const abr = await User.find({ role: 'Admin' });
+
+    // Extract FCM tokens from volunteers
+    const tokens = abr.map(v => v.fcmToken).filter(Boolean);
+
+    if (tokens.length) {
+      const message = {
+        notification: {
+          title: 'Stall Booking!',
+          body: `${name} has booked a stall`,
+        },
+        tokens, // List of FCM tokens
+      };
+
+      console.log('Prepared FCM message:', message);
+
+      // Send the notification to multiple devices
+      const response = await admin.messaging().sendEachForMulticast(message);
+      console.log('Notification send response:', response);
+
+      // Log detailed errors for failed tokens
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          console.error(`Failed to send to token: ${tokens[idx]}`, resp.error);
+        }
+      });
+
+    } else {
+      console.log('No valid FCM tokens found.');
+    }
         res.status(201).json(newBookStall);
     } catch (error) {
         res.status(400).json({ error: error.message });

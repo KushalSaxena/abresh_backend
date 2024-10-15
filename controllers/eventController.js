@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Event = require('../models/eventModel.js');
 
+
 exports.createEvent = async (req,res) =>{
     const {city, date, poster} = req.body;
     
