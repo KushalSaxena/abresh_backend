@@ -8,7 +8,7 @@ const bcrypt = require('bcrypt');
 // Signup and email verification
 // Signup and email verification
 exports.signup = async (req, res) => {
-  const { username, email, password, role, fcmToken } = req.body;
+  const { email, password, role, fcmToken } = req.body;
 
   try {
     // Check if the user already exists
@@ -19,7 +19,7 @@ exports.signup = async (req, res) => {
     const tokenToSave = fcmToken || generateFcmToken();
 
     // Create a new user
-    const user = await User.create({ username ,email, password, role, fcmToken: tokenToSave});
+    const user = await User.create({ email, password, role, fcmToken: tokenToSave });
 
     // Generate a JWT token for email verification
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
@@ -30,11 +30,11 @@ exports.signup = async (req, res) => {
 
     // Email content
     const subject = 'Email Verification';
-    const text = `Hi ${username},\n\nPlease verify your email by clicking on the following link: ${verificationUrl}\n\nThanks,\nABResh Events`;
+    const text = `Hi ,\n\nPlease verify your email by clicking on the following link: ${verificationUrl}\n\nThanks,\nABResh Events`;
 
     // Send verification email
     await sendEmail(
-      'artscape@abresh.com',              // Sender email (you can change this to your desired sender email)
+      'hello@abresh.com',              // Sender email (you can change this to your desired sender email)
       process.env.EMAIL_USER,               // SMTP user from environment variables
       process.env.EMAIL_PASS,               // SMTP password from environment variables
       email,                               // Receiver's email (user's email)
@@ -43,7 +43,8 @@ exports.signup = async (req, res) => {
     );
 
     // Respond with success
-    res.status(201).json({ message: 'Signup successful', token , role: user.role, id: user._id, fcmToken: user.fcmToken,
+    res.status(201).json({
+      message: 'Signup successful', token, role: user.role, id: user._id, fcmToken: user.fcmToken,
     });
 
   } catch (error) {
@@ -90,11 +91,11 @@ exports.verifyEmail = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  const { username, email, password, fcmToken } = req.body;
+  const { email, password, fcmToken } = req.body;
 
   try {
     // Check if both email and username are provided
-    if (!email || !username) {
+    if (!email) {
       return res.status(400).json({ error: 'Email and Username are required' });
     }
 
@@ -104,10 +105,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'User with this email not found' });
     }
 
-    // Check if the username matches the email
-    if (user.username !== username) {
-      return res.status(400).json({ error: 'Username does not match with the provided email' });
-    }
+
     // Check if the email is verified
     if (!user.isVerified) {
       return res.status(400).json({ error: 'Please verify your email first' });
@@ -127,11 +125,69 @@ exports.login = async (req, res) => {
     });
 
     // Respond with success message and token
-    res.status(200).json({ message: 'Login successful', token, role: user.role, username : user.username, email : user.email, id: user._id , fcmToken: user.fcmToken});
+    res.status(200).json({ message: 'Login successful', token, role: user.role, email: user.email, id: user._id, fcmToken: user.fcmToken });
 
   } catch (error) {
     // Log detailed error and respond with 500 status
-    console.error('Login error:', error);
+    console.error('Login error, please login again');
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.saveUser = async (req, res) => {
+  const { email, password, role, fcmToken } = req.body;
+
+  try {
+    // Check if the user already exists in MongoDB
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // If user doesn't exist, create a new one
+      const tokenToSave = fcmToken || generateFcmToken();
+      const user = new User({
+        email,
+        password,
+        role,
+        isVerified: true,  // Mark the user as verified
+        fcmToken: tokenToSave,  // Save FCM token
+      });
+
+      await user.save();
+
+      const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+        expiresIn: '1d',
+      });
+
+      return res.status(200).json({
+        message: 'User saved successfully',
+        token,
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        fcmToken: user.fcmToken,  // Return the FCM token in response
+      });
+    } else {
+      // If user exists, update the FCM token if it has changed
+      if (user.fcmToken !== fcmToken) {
+        user.fcmToken = fcmToken;
+        await user.save();  // Save updated FCM token
+      }
+
+      const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+        expiresIn: '1d',
+      });
+
+      return res.status(200).json({
+        message: 'User already exists',
+        token,
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        fcmToken: user.fcmToken,
+      });
+    }
+  } catch (error) {
+    console.error('Error saving user:', error);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 };

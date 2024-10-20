@@ -5,11 +5,11 @@ const User = require('../models/userModel');
 // Submit New User Request (Create Task)
 exports.submitUserRequest = async (req, res) => {
   try {
-    const { username, userRequest } = req.body;
+    const { email, userRequest } = req.body;
 
     // Create a new task document
     const newTask = new Task({
-      username,        // The user submitting the request
+      email,        // The user submitting the request
       userRequest,     // The actual user request or task details
     });
 
@@ -25,7 +25,7 @@ exports.submitUserRequest = async (req, res) => {
       const message = {
         notification: {
           title: 'Volunteer Request!',
-          body: `${username} has requested for ${userRequest}`,
+          body: `${email} has requested for ${userRequest}`,
         },
         tokens, // List of FCM tokens
       };

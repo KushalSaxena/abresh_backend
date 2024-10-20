@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const eventRegisterSchema = new mongoose.Schema({
     eventCategory : {type : String, required : true},
+    options : {type : String, required : true},
     name : {type : String, required : true},
     dateOfBirth : {type : String, required: true},
     gender : {type : String, required : true},

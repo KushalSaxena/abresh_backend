@@ -7,6 +7,7 @@ exports.eventRegister = async (req, res) => {
     try {
         const {
             eventCategory,
+            options,
             name,
             dateOfBirth,
             gender,
@@ -29,6 +30,7 @@ exports.eventRegister = async (req, res) => {
 
         const newEventRegister = new EventRegister({
             eventCategory,
+            options,
             name,
             dateOfBirth,
             gender,
@@ -64,38 +66,38 @@ exports.eventRegister = async (req, res) => {
           
           Best,
           Team ABResh Events`
-          );
-         
-          const abr = await User.find({ role: 'Admin' });
+        );
 
-          // Extract FCM tokens from volunteers
-          const tokens = abr.map(v => v.fcmToken).filter(Boolean);
-      
-          if (tokens.length) {
+        const abr = await User.find({ role: 'Admin' });
+
+        // Extract FCM tokens from volunteers
+        const tokens = abr.map(v => v.fcmToken).filter(Boolean);
+
+        if (tokens.length) {
             const message = {
-              notification: {
-                title: 'Event Participation!',
-                body: `${name} has participated in the event`,
-              },
-              tokens, // List of FCM tokens
+                notification: {
+                    title: 'Event Participation!',
+                    body: `${name} has participated in the event`,
+                },
+                tokens, // List of FCM tokens
             };
-      
+
             console.log('Prepared FCM message:', message);
-      
+
             // Send the notification to multiple devices
             const response = await admin.messaging().sendEachForMulticast(message);
             console.log('Notification send response:', response);
-      
+
             // Log detailed errors for failed tokens
             response.responses.forEach((resp, idx) => {
-              if (!resp.success) {
-                console.error(`Failed to send to token: ${tokens[idx]}`, resp.error);
-              }
+                if (!resp.success) {
+                    console.error(`Failed to send to token: ${tokens[idx]}`, resp.error);
+                }
             });
-      
-          } else {
+
+        } else {
             console.log('No valid FCM tokens found.');
-          }  
+        }
         res.status(200).json(saveEventRegister);
     }
     catch (err) {
@@ -121,7 +123,7 @@ exports.deleteEventRegistration = async (req, res) => {
         const { id } = req.params;
 
         const deletedEventRegistration = await EventRegister.findByIdAndDelete(id);
-        
+
         if (!deletedEventRegistration) {
             return res.status(404).json({ error: 'Event registration not found' });
         }
@@ -172,7 +174,7 @@ exports.updateEventRegister = async (req, res) => {
         // If event registration is not found, send an error
         if (!updatedEventRegister) {
             return res.status(404).json({ error: "Event registration not found" });
-        }        
+        }
 
         // Send the updated event registration details in the response
         res.status(200).json(updatedEventRegister);
