@@ -1,6 +1,8 @@
 // /controllers/sponsorshipController.js
 const Sponsorship = require('../models/sponsorshipModel');
-
+const sendEmail = require('../utils/sendEmail');
+const admin = require('../config/firebase'); // Firebase Admin SDK setup
+const User = require('../models/userModel');
 // Handle form submission
 exports.createSponsorship = async (req, res) => {
     try {
@@ -46,27 +48,43 @@ exports.createSponsorship = async (req, res) => {
             process.env.EMAIL_PASS,                 // SMTP password for this sender
             email,                                  // Receiver email
             'Thank You for Your Interest in Sponsoring ABR ArtScape 2024! 🌟', // Subject
-            `Dear ${companyName},
-          
-            We are beyond thrilled to have received your interest in sponsoring ABR ArtScape 2024 in Hisar, Haryana! 🌟 Your support means a great deal to us, and we can’t wait to explore how your brand can shine at one of the most exciting art festivals of the year.
-          
-            An authorized representative from ABResh Events will be in touch with you within the next 4 business hours to discuss your sponsorship opportunity and answer any questions you might have. Get ready for a fantastic partnership that will not only promote your brand but also support a celebration of creativity and talent!
-          
-            In the meantime, feel free to dive into the world of ABR ArtScape through our [website/social media links] to explore what makes this festival so special. We’re sure you’ll love what you see!
-          
-            If you have any special requests or questions before we connect, don't hesitate to reach out—we’re here to help!
-          
-            Thank you once again for considering this incredible opportunity. We look forward to partnering with you to make ABR ArtScape 2024 truly unforgettable!
-          
-            Warm regards,
-            ABResh Events Team`
+            `Dear ${companyName},\n\n We are beyond thrilled to have received your interest in sponsoring ABR ArtScape 2024 in Hisar, Haryana! 🌟 Your support means a great deal to us, and we can’t wait to explore how your brand can shine at one of the most exciting art festivals of the year.\n\nAn authorized representative from ABResh Events will be in touch with you within the next 4 business hours to discuss your sponsorship opportunity and answer any questions you might have. Get ready for a fantastic partnership that will not only promote your brand but also support a celebration of creativity and talent!\n\nIn the meantime, feel free to dive into the world of ABR ArtScape through our [website/social media links] to explore what makes this festival so special. We’re sure you’ll love what you see!\n\nIf you have any special requests or questions before we connect, don't hesitate to reach out—we’re here to help!\n\nThank you once again for considering this incredible opportunity. We look forward to partnering with you to make ABR ArtScape 2024 truly unforgettable!\n\nWarm regards,\nABResh Events Team`
           );
           
-        res.status(201).json(savedSponsorship);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error' });
-    }
+          const abr = await User.find({ role: 'Admin' });
+
+          // Extract FCM tokens from volunteers
+          const tokens = abr.map(v => v.fcmToken).filter(Boolean);
+      
+          if (tokens.length) {
+            const message = {
+              notification: {
+                title: 'Stall Booking!',
+                body: `${name} has booked a stall`,
+              },
+              tokens, // List of FCM tokens
+            };
+      
+            console.log('Prepared FCM message:', message);
+      
+            // Send the notification to multiple devices
+            const response = await admin.messaging().sendEachForMulticast(message);
+            console.log('Notification send response:', response);
+      
+            // Log detailed errors for failed tokens
+            response.responses.forEach((resp, idx) => {
+              if (!resp.success) {
+                console.error(`Failed to send to token: ${tokens[idx]}`, resp.error);
+              }
+            });
+      
+          } else {
+            console.log('No valid FCM tokens found.');
+          }
+              res.status(201).json(newBookStall);
+          } catch (error) {
+              res.status(400).json({ error: error.message });
+          }
 };
 
 
