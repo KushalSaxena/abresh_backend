@@ -60,7 +60,7 @@ exports.createSponsorship = async (req, res) => {
             const message = {
               notification: {
                 title: 'Stall Booking!',
-                body: `${name} has booked a stall`,
+                body: `${companyName} has booked a stall`,
               },
               tokens, // List of FCM tokens
             };
