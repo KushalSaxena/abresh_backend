@@ -59,8 +59,8 @@ exports.createSponsorship = async (req, res) => {
           if (tokens.length) {
             const message = {
               notification: {
-                title: 'Stall Booking!',
-                body: `${companyName} has booked a stall`,
+                title: 'New Sponsor!',
+                body: `${companyName}`,
               },
               tokens, // List of FCM tokens
             };
@@ -81,7 +81,7 @@ exports.createSponsorship = async (req, res) => {
           } else {
             console.log('No valid FCM tokens found.');
           }
-              res.status(201).json(newBookStall);
+              res.status(201).json(savedSponsorship);
           } catch (error) {
               res.status(400).json({ error: error.message });
           }
