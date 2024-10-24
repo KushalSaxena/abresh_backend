@@ -134,8 +134,10 @@ exports.login = async (req, res) => {
   }
 };
 
+const crypto = require('crypto');  // Import crypto for generating random password
+
 exports.saveUser = async (req, res) => {
-  const { email, password, role, fcmToken } = req.body;
+  const { email, role, fcmToken } = req.body; // Removed 'password' from body since we'll generate it
 
   try {
     // Check if the user already exists in MongoDB
@@ -144,9 +146,17 @@ exports.saveUser = async (req, res) => {
     if (!user) {
       // If user doesn't exist, create a new one
       const tokenToSave = fcmToken || generateFcmToken();
-      const user = new User({
+
+      // Generate a random password for the user
+      const randomPassword = crypto.randomBytes(10).toString('hex'); // Generating a random 20-character password
+
+      // Hash the generated password
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      // Create a new user with the random hashed password
+      user = new User({
         email,
-        password,
+        password: hashedPassword, // Save the hashed password
         role,
         isVerified: true,  // Mark the user as verified
         fcmToken: tokenToSave,  // Save FCM token
@@ -154,6 +164,7 @@ exports.saveUser = async (req, res) => {
 
       await user.save();
 
+      // Generate JWT token for the user
       const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
         expiresIn: '3d',
       });
@@ -173,6 +184,7 @@ exports.saveUser = async (req, res) => {
         await user.save();  // Save updated FCM token
       }
 
+      // Generate JWT token for the existing user
       const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
         expiresIn: '3d',
       });
@@ -191,3 +203,4 @@ exports.saveUser = async (req, res) => {
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
