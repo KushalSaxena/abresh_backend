@@ -9,6 +9,7 @@ const eventRegisterSchema = new mongoose.Schema({
     email : {type : String, required: true},
     phoneNumber : {type : Number, required: true},
     alternateNumber : {type : Number},
+    referredBy : {type : String},
     mailingAddress : {type : String, required : true},
     theme : {type : String, required : true},
     description : {type : String, required : true},
